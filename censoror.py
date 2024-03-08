@@ -49,6 +49,9 @@ def process_files(file_paths, output_dir, censor_flags):
             # Generate the output file path with the .censored suffix
             output_file_name = os.path.basename(file_path) + ".censored"
             output_file_path = os.path.join(output_dir, output_file_name)
+            
+            # Create the output directory if it doesn't exist
+            os.makedirs(output_dir, exist_ok=True)
 
             # Write the modified text to the output file
             with open(output_file_path, 'w') as output_file:
