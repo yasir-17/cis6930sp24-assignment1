@@ -1,14 +1,14 @@
 import argparse
-# import spacy.cli
-# import spacy
+import spacy.cli
+import spacy
 import os
 import glob
 from google.cloud import language_v1
 import re
-import stanza
+
 
 # Download the spaCy large English model
-# spacy.cli.download("en_core_web_lg")
+spacy.cli.download("en_core_web_lg")
 
 
 # Function to filter out 4-digit numbers from the list
@@ -22,20 +22,20 @@ def replace_with_blocks(text, entities):
         text = text.replace(replace_str, full_block)
     return text
 
-def analyze_entities(text_content, stanza_nlp):
+def analyze_entities(text_content, nlp):
 
     # Process the text using the NER model
-    # doc_nlp = nlp(text_content)
-    doc_stanza = stanza_nlp(text_content)
+    doc_nlp = nlp(text_content)
+    # doc_stanza = stanza_nlp(text_content)
     
     # Extract person names
-    for sent in doc_stanza.sentences:
-        for ent in sent.ents:
-            if ent.type == 'PERSON':
-                stanza_name = [ent.text]
+    # for sent in doc_stanza.sentences:
+    #     for ent in sent.ents:
+    #         if ent.type == 'PERSON':
+    #             stanza_name = [ent.text]
 
     # Extract named entities (names, addresses, dates, and phone numbers)
-    # names = [ent.text for ent in doc_nlp.ents if ent.label_ == "PERSON"]
+    names = [ent.text for ent in doc_nlp.ents if ent.label_ == "PERSON"]
     client = language_v1.LanguageServiceClient.from_service_account_json('services.json')
 
     document = language_v1.Document(content=text_content, type_=language_v1.Document.Type.PLAIN_TEXT)
@@ -44,14 +44,14 @@ def analyze_entities(text_content, stanza_nlp):
     entities = response.entities
 
     entity_texts = [entity.name for entity in entities if language_v1.Entity.Type(entity.type_).name in ['DATE', 'ADDRESS', 'PHONE_NUMBER']]
-    entity_texts += stanza_name
-    # entity_texts += names
+    # entity_texts += stanza_name
+    entity_texts += names
 
     return entity_texts
 
-def detect_information(text, stanza_nlp):
+def detect_information(text, nlp):
     # Extract entities using Google Cloud Natural Language API
-    entities = analyze_entities(text, stanza_nlp)
+    entities = analyze_entities(text, nlp)
 
     # Replace entities with Unicode full block characters
     text = replace_with_blocks(text, entities)
@@ -60,10 +60,10 @@ def detect_information(text, stanza_nlp):
 
 def process_files(file_paths, output_dir):
     # Load the English NER model from spacy
-    # nlp = spacy.load("en_core_web_lg")
+    nlp = spacy.load("en_core_web_lg")
     
     # Load the English model
-    stanza_nlp = stanza.Pipeline('en', processors='tokenize,ner')
+    # stanza_nlp = stanza.Pipeline('en', processors='tokenize,ner')
 
     for file_path in file_paths:
         print(f"\nProcessing file: {file_path}")
@@ -73,7 +73,7 @@ def process_files(file_paths, output_dir):
                 text_content = file.read()
 
             # Detect information from the text and replace with full block characters
-            modified_text = detect_information(text_content, stanza_nlp)
+            modified_text = detect_information(text_content, nlp)
 
             # Generate the output file path with the .censored suffix
             output_file_name = os.path.basename(file_path) + ".censored"
@@ -119,9 +119,6 @@ if __name__ == "__main__":
         else:
             # Create the output directory if it doesn't exist
             os.makedirs(args.output, exist_ok=True)
-
-            # Set up spaCy model
-            # nlp = spacy.load("en_core_web_lg")
 
             # Process the files based on the specified censor flags
             censor_flags = {"names": args.names, "dates": args.dates, "phones": args.phones, "address": args.address}
