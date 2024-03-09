@@ -8,6 +8,8 @@ spacy = "*"
 pyap = "*"
 dateparser = "*"
 google-cloud-language = "*"
+pytest = "*"
+stanza = "*"
 
 [dev-packages]
 
