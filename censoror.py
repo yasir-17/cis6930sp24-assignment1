@@ -112,7 +112,7 @@ if __name__ == "__main__":
         # Use the glob pattern to get a list of text files
         file_paths = []
         for file_glob in args.input:
-            file_paths.extend(glob.glob(os.path.join('./docs/Text_Files', file_glob)))
+            file_paths.extend(glob.glob(os.path.join('./', file_glob)))
 
         if not file_paths:
             print("No matching files found with the specified patterns.")
