@@ -3,32 +3,50 @@ import spacy.cli
 import spacy
 import os
 import glob
-import pyap
-from dateutil import parser
-from dateparser.search import search_dates
+from google.cloud import language
+from google.cloud import language_v1
+import re
 
 # Download the spaCy large English model
 spacy.cli.download("en_core_web_lg")
 
+
+# Function to filter out 4-digit numbers from the list
+def filter_out_4_digit_numbers(strings):
+    return [s for s in strings if not re.match(r'^\d{4}$', s)]
+
 def replace_with_blocks(text, entities):
-    for entity in entities:
-        text = text.replace(entity, '\u2588' * len(entity))
+    ent = filter_out_4_digit_numbers(entities)
+    for replace_str in ent:
+        full_block = "\u2588" * len(replace_str)  # Unicode full block character
+        text = text.replace(replace_str, full_block)
     return text
 
-def detect_information(text, nlp):
+def analyze_entities(text_content, nlp):
+
     # Process the text using the NER model
-    doc = nlp(text)
+    doc = nlp(text_content)
 
     # Extract named entities (names, addresses, dates, and phone numbers)
     names = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
-    addresses = [ent.text for ent in doc.ents if ent.label_ == "GPE"]
-    phones = [ent.text for ent in doc.ents if ent.label_ == "PHONE"]
-    
-    # Extract only the string part of the tuple for dates
-    dates = [date[0] if isinstance(date, tuple) else date for date in search_dates(text)]
+    client = language.LanguageServiceClient.from_service_account_json('services.json')
+
+    document = language_v1.Document(content=text_content, type_=language_v1.Document.Type.PLAIN_TEXT)
+    response = client.analyze_entities(document=document, encoding_type=language_v1.EncodingType.UTF8)
+
+    entities = response.entities
+
+    entity_texts = [entity.name for entity in entities if language_v1.Entity.Type(entity.type_).name in ['DATE', 'ADDRESS', 'PHONE_NUMBER']]
+    entity_texts += names
+
+    return entity_texts
+
+def detect_information(text, nlp):
+    # Extract entities using Google Cloud Natural Language API
+    entities = analyze_entities(text, nlp)
 
     # Replace entities with Unicode full block characters
-    text = replace_with_blocks(text, names + addresses + dates + phones)
+    text = replace_with_blocks(text, entities)
 
     return text
 
