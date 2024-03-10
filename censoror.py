@@ -5,11 +5,10 @@ import os
 import glob
 from google.cloud import language_v1
 import re
-
+import sys
 
 # Download the spaCy large English model
 spacy.cli.download("en_core_web_lg")
-
 
 # Function to filter out 4-digit numbers from the list
 def filter_out_4_digit_numbers(strings):
@@ -23,12 +22,11 @@ def replace_with_blocks(text, entities):
     return text
 
 def analyze_entities(text_content):
-    
-    count = [] # count variable for stats [name, address, phone no., date]
+    count = []  # count variable for stats [name, address, phone no., date]
 
     # Load the English NER model from spacy
     nlp = spacy.load("en_core_web_lg")
-    
+
     # Process the text with the spaCy NLP pipeline
     doc = nlp(text_content)
 
@@ -42,47 +40,53 @@ def analyze_entities(text_content):
     entities = response.entities
 
     entity_texts = [entity.name for entity in entities if language_v1.Entity.Type(entity.type_).name in ['DATE', 'ADDRESS', 'PHONE_NUMBER']]
-    
-    # Count occurence of each entity
+
+    # Count occurrence of each entity
     date = address = phone = 0
     for entity in entities:
-        if language_v1.Entity.Type(entity.type_).name == 'DATE' :
+        if language_v1.Entity.Type(entity.type_).name == 'DATE':
             date += 1
-        elif language_v1.Entity.Type(entity.type_).name == "ADDRESS" :
+        elif language_v1.Entity.Type(entity.type_).name == "ADDRESS":
             address += 1
-        elif language_v1.Entity.Type(entity.type_).name == "PHONE_NUMBER" :
+        elif language_v1.Entity.Type(entity.type_).name == "PHONE_NUMBER":
             phone += 1
-       
-    count = [len(names), address, date, phone]     
-    # entity_texts += stanza_name
+
+    count = [len(names), address, date, phone]
     entity_texts += names
 
     return entity_texts, count
 
-def print_stats(count) :
-    
-    print ("Number of name censored - ", count[0])
-    print ("Number of address censored - ", count[1])
-    print ("Number of date censored - ", count[2])
-    print ("Number of phone no. censored - ", count[3])
+def print_stats(count, stats_file=None):
+    if stats_file:
+        # Write stats to the specified file
+        with open(stats_file, 'a') as f:
+            f.write(f"Number of name censored - {count[0]}\n")
+            f.write(f"Number of address censored - {count[1]}\n")
+            f.write(f"Number of date censored - {count[2]}\n")
+            f.write(f"Number of phone no. censored - {count[3]}\n")
+    else:
+        # Print stats to stderr or stdout
+        print("Number of name censored - ", count[0], file=sys.stderr if args.stats == "stderr" else sys.stdout)
+        print("Number of address censored - ", count[1], file=sys.stderr if args.stats == "stderr" else sys.stdout)
+        print("Number of date censored - ", count[2], file=sys.stderr if args.stats == "stderr" else sys.stdout)
+        print("Number of phone no. censored - ", count[3], file=sys.stderr if args.stats == "stderr" else sys.stdout)
 
-def detect_information(text):
+def detect_information(text, censor_flags):
     # Extract entities using Google Cloud Natural Language API
     entities, count = analyze_entities(text)
 
     # Replace entities with Unicode full block characters
     text = replace_with_blocks(text, entities)
-    
+
     # Print stats
-    print_stats(count)
+    if args.stats == "stderr" or args.stats == "stdout":
+        print_stats(count)
+    else:
+        print_stats(count, stats_file=args.stats)
 
     return text
 
-def process_files(file_paths, output_dir):
-    
-    # Load the English model
-    # stanza_nlp = stanza.Pipeline('en', processors='tokenize,ner')
-
+def process_files(file_paths, output_dir, censor_flags):
     for file_path in file_paths:
         print(f"\nProcessing file: {file_path}")
         try:
@@ -91,12 +95,12 @@ def process_files(file_paths, output_dir):
                 text_content = file.read()
 
             # Detect information from the text and replace with full block characters
-            modified_text = detect_information(text_content)
+            modified_text = detect_information(text_content, censor_flags)
 
             # Generate the output file path with the .censored suffix
             output_file_name = os.path.basename(file_path) + ".censored"
             output_file_path = os.path.join(output_dir, output_file_name)
-            
+
             # Create the output directory if it doesn't exist
             os.makedirs(output_dir, exist_ok=True)
 
@@ -110,7 +114,6 @@ def process_files(file_paths, output_dir):
             print(f"Error processing file {file_path}: {e}")
 
 if __name__ == "__main__":
-    
     parser = argparse.ArgumentParser(description="Censor files based on specified entity types.")
     parser.add_argument("--input", nargs="+", help="Glob patterns representing input files.")
     parser.add_argument("--output", required=True, help="Directory to store censored files.")
@@ -118,8 +121,8 @@ if __name__ == "__main__":
     parser.add_argument("--dates", action="store_true", help="Censor dates.")
     parser.add_argument("--phones", action="store_true", help="Censor phone numbers.")
     parser.add_argument("--address", action="store_true", help="Censor addresses.")
-    parser.add_argument("--stats", choices=["stdout", "stderr"], default="stderr", help="Output statistics to stdout or stderr.")
-    
+    parser.add_argument("--stats", help="Output statistics to a file or stderr/stdout.")
+
     args = parser.parse_args()
 
     if not args.input:
@@ -141,8 +144,6 @@ if __name__ == "__main__":
             selected_flags = [flag for flag, value in censor_flags.items() if value]
 
             if selected_flags:
-                process_files(file_paths, args.output)
+                process_files(file_paths, args.output, censor_flags)
             else:
                 print("Please specify at least one censor flag (--names, --dates, --phones, --address).")
-        
-
