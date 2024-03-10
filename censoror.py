@@ -22,20 +22,18 @@ def replace_with_blocks(text, entities):
         text = text.replace(replace_str, full_block)
     return text
 
-def analyze_entities(text_content, nlp):
-
-    # Process the text using the NER model
-    doc_nlp = nlp(text_content)
-    # doc_stanza = stanza_nlp(text_content)
+def analyze_entities(text_content):
     
-    # Extract person names
-    # for sent in doc_stanza.sentences:
-    #     for ent in sent.ents:
-    #         if ent.type == 'PERSON':
-    #             stanza_name = [ent.text]
+    count = [] # count variable for stats [name, address, phone no., date]
 
-    # Extract named entities (names, addresses, dates, and phone numbers)
-    names = [ent.text for ent in doc_nlp.ents if ent.label_ == "PERSON"]
+    # Load the English NER model from spacy
+    nlp = spacy.load("en_core_web_lg")
+    
+    # Process the text with the spaCy NLP pipeline
+    doc = nlp(text_content)
+
+    # Extract named entities (addresses, dates, and phone numbers) using google natural language api
+    names = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
     client = language_v1.LanguageServiceClient.from_service_account_json('services.json')
 
     document = language_v1.Document(content=text_content, type_=language_v1.Document.Type.PLAIN_TEXT)
@@ -44,23 +42,43 @@ def analyze_entities(text_content, nlp):
     entities = response.entities
 
     entity_texts = [entity.name for entity in entities if language_v1.Entity.Type(entity.type_).name in ['DATE', 'ADDRESS', 'PHONE_NUMBER']]
+    
+    # Count occurence of each entity
+    date = address = phone = 0
+    for entity in entities:
+        if language_v1.Entity.Type(entity.type_).name == 'DATE' :
+            date += 1
+        elif language_v1.Entity.Type(entity.type_).name == "ADDRESS" :
+            address += 1
+        elif language_v1.Entity.Type(entity.type_).name == "PHONE_NUMBER" :
+            phone += 1
+       
+    count = [len(names), address, date, phone]     
     # entity_texts += stanza_name
     entity_texts += names
 
-    return entity_texts
+    return entity_texts, count
 
-def detect_information(text, nlp):
+def print_stats(count) :
+    
+    print ("Number of name censored - ", count[0])
+    print ("Number of address censored - ", count[1])
+    print ("Number of date censored - ", count[2])
+    print ("Number of phone no. censored - ", count[3])
+
+def detect_information(text):
     # Extract entities using Google Cloud Natural Language API
-    entities = analyze_entities(text, nlp)
+    entities, count = analyze_entities(text)
 
     # Replace entities with Unicode full block characters
     text = replace_with_blocks(text, entities)
+    
+    # Print stats
+    print_stats(count)
 
     return text
 
 def process_files(file_paths, output_dir):
-    # Load the English NER model from spacy
-    nlp = spacy.load("en_core_web_lg")
     
     # Load the English model
     # stanza_nlp = stanza.Pipeline('en', processors='tokenize,ner')
@@ -73,7 +91,7 @@ def process_files(file_paths, output_dir):
                 text_content = file.read()
 
             # Detect information from the text and replace with full block characters
-            modified_text = detect_information(text_content, nlp)
+            modified_text = detect_information(text_content)
 
             # Generate the output file path with the .censored suffix
             output_file_name = os.path.basename(file_path) + ".censored"
@@ -86,8 +104,6 @@ def process_files(file_paths, output_dir):
             with open(output_file_path, 'w') as output_file:
                 output_file.write(modified_text)
 
-            # Display the modified text
-            print("Modified Text:", modified_text)
             print(f"Output file saved to: {output_file_path}")
 
         except Exception as e:

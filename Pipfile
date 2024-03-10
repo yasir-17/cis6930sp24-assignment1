@@ -5,11 +5,8 @@ name = "pypi"
 
 [packages]
 spacy = "*"
-pyap = "*"
-dateparser = "*"
-google-cloud-language = "*"
 pytest = "*"
-stanza = "*"
+google-cloud-language = "*"
 
 [dev-packages]
 
