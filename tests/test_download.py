@@ -27,7 +27,7 @@ class TestCensoringFunctions(unittest.TestCase):
 
     @patch('censoror.language_v1.LanguageServiceClient.from_service_account_json')
     def test_find_addresses(self, mock_client):
-        mock_client.return_value.analyze_entities.return_value = MockResponse(entity_type='LOCATION', entity_text=['1400 Smith Street Houston, TX  77002-7311'])
+        mock_client.return_value.analyze_entities.return_value = MockResponse(entity_type='ADDRESS', entity_text=['1400 Smith Street Houston, TX  77002-7311'])
         text_content = "Send this to 1400 Smith Street Houston, TX  77002-7311"
         expected_result = ['1400 Smith Street Houston, TX  77002-7311']
         self.assertEqual(find_addresses(text_content), expected_result)
