@@ -1,0 +1,156 @@
+Number of name censored - 8
+Number of address censored - 0
+Number of date censored - 3
+Number of phone no. censored - 0
+Number of name censored - 118
+Number of address censored - 0
+Number of date censored - 4
+Number of phone no. censored - 0
+Number of name censored - 0
+Number of address censored - 3
+Number of date censored - 2
+Number of phone no. censored - 1
+Number of name censored - 3
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 13
+Number of address censored - 0
+Number of date censored - 2
+Number of phone no. censored - 0
+Number of name censored - 4
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 1
+Number of address censored - 0
+Number of date censored - 7
+Number of phone no. censored - 1
+Number of name censored - 0
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 3
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 1
+Number of name censored - 21
+Number of address censored - 0
+Number of date censored - 8
+Number of phone no. censored - 0
+Number of name censored - 0
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 5
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 2
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 1
+Number of name censored - 4
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 3
+Number of name censored - 2
+Number of address censored - 1
+Number of date censored - 4
+Number of phone no. censored - 0
+Number of name censored - 8
+Number of address censored - 0
+Number of date censored - 3
+Number of phone no. censored - 0
+Number of name censored - 118
+Number of address censored - 0
+Number of date censored - 4
+Number of phone no. censored - 0
+Number of name censored - 0
+Number of address censored - 3
+Number of date censored - 2
+Number of phone no. censored - 1
+Number of name censored - 118
+Number of address censored - 0
+Number of date censored - 4
+Number of phone no. censored - 0
+Number of name censored - 3
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 4
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 0
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 3
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 1
+Number of name censored - 21
+Number of address censored - 0
+Number of date censored - 8
+Number of phone no. censored - 0
+Number of name censored - 4
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 3
+Number of name censored - 118
+Number of address censored - 0
+Number of date censored - 4
+Number of phone no. censored - 0
+Number of name censored - 3
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 4
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 0
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 3
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 21
+Number of address censored - 0
+Number of date censored - 8
+Number of phone no. censored - 0
+Number of name censored - 4
+Number of address censored - 0
+Number of date censored - 1
+Number of phone no. censored - 0
+Number of name censored - 118
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 3
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 4
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 0
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 3
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 21
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
+Number of name censored - 4
+Number of address censored - 0
+Number of date censored - 0
+Number of phone no. censored - 0
