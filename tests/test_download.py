@@ -61,11 +61,10 @@ class MockGoogleEntity:
     def __init__(self, name, type_):
         self.name = name
         self.type_ = {
-            'LOCATION': language_v1.Entity.Type.LOCATION,
+            'ADDRESS': language_v1.Entity.Type.ADDRESS,
             'DATE': language_v1.Entity.Type.DATE,
             'PHONE_NUMBER': language_v1.Entity.Type.PHONE_NUMBER,
-            # Add more types as needed
-        }.get(type_, language_v1.Entity.Type.UNKNOWN)
+            }.get(type_, language_v1.Entity.Type.UNKNOWN)
 
 if __name__ == '__main__':
     unittest.main()
