@@ -34,15 +34,19 @@ For running the testcase use the following command
 7) process_files(file_paths, output_dir) - Given a list of file paths and an output directory, this function iterates through the files, reads, processes, and writes modified versions based on specified censor flags. It serves as the main pipeline orchestrator, handling the processing of multiple files.
 
 ## Testings
-For testing, I am testing to see that each function is perfoming as expected
+For testing, I am testing to see that each function is perfoming as expected using mocking
 
-1) test_analyze_entities_name - This test case aims to validate the analyze_entities function's ability to accurately extract and return named entities (PERSON) from the input text. The test creates a mock spaCy NLP object, configures it with mock entities representing names ("John Doe" and "Jane Smith"), and ensures that the function correctly identifies and returns these entities when analyzing the provided text containing these names.
+1) test_filter_out_4_digit_numbers - This test ensures the correct functioning of the filter_out_4_digit_numbers function, which aims to filter out 4-digit numbers from a list of strings. The test provides a scenario with a list containing a mix of words and 4-digit numbers, asserting that the function correctly identifies and removes the numerical elements, leaving only the words in the final result.
 
-2) test_empty_input - This test verifies the behavior of the analyze_entities function when given with an empty input text. By calling the function with an empty string, the test ensures that the function gracefully handles this edge case, returning an empty list as expected.
+2) test_replace_with_blocks - The replace_with_blocks function is subjected to testing in this case, where it is expected to replace specified entities within a given text with Unicode block characters. The test supplies a sample text and a list of entities, evaluating whether the function accurately obscures sensitive information by replacing the identified entities with block characters.
 
-3) test_no_entities - The purpose of this test is to confirm that the analyze_entities function appropriately handles input text without relevant entities. Using a sample text devoid of entities ("The quick brown fox..."), the test ensures that the function correctly returns an empty list, indicating the absence of identified entities.
+3) test_find_names - This test focuses on the find_names function, which utilizes spaCy entity recognition to extract names from a provided text. The scenario involves a greeting containing a person's full name, and the test verifies that the function correctly identifies and returns the name as a list within the expected result.
 
-4) test_entitites - This test case aims to validate the analyze_entities function's correct identification and extraction of relevant entities (DATE, ADDRESS, PHONE_NUMBER) from the input text. The test involves analyzing a text containing a mix of relevant entities, such as a date, an address, and a phone number. By comparing the identified entities to the expected output, the test ensures the function's accuracy in extracting the specified types of information.
+4) test_find_addresses - The find_addresses function undergoes scrutiny in this test, checking its ability to identify and extract addresses from a given text using the Google Cloud Language API. The test supplies a text with an embedded address and asserts that the function accurately recognizes and returns the address within the expected result.
+
+5) test_find_dates - This test assesses the capability of the find_dates function, which is designed to recognize and extract date entities from a provided text. The scenario presents a sentence mentioning a specific date, and the test confirms that the function correctly identifies and returns the date information as part of the expected result.
+
+6) test_find_phone_numbers - The functionality of the find_phone_numbers function is tested in this scenario, focusing on its accuracy in identifying and extracting phone numbers using the Google Cloud Language API. The test supplies a text with a phone number and checks that the function successfully recognizes and returns the phone number within the expected result.
 
 
 ## Bugs and Assumptions
