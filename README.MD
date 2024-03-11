@@ -48,4 +48,4 @@ For testing, I am testing to see that each function is perfoming as expected
 ## Bugs and Assumptions
 1) The bug is that the function is not detecting name for all the cases since the spacy librray does not have 100% accuracy.
 2) I have test the code for usa phone number, but there is a chance it won't work for non usa phone number as other countries have phone no. in different format and some countries even have phone no. which are less than or more than 10 digits long.
-3) The assumption is that that while running the code we are censoring all the name, address, phone no, and date and we are not censoring any more entitites than the one specified above.
+3) The assumption is that that while running the code we are censoring only the entity which is mentioned in the running command and we are not censoring any more entitites than the one specified in the assignment(name, address, date, phone no.).

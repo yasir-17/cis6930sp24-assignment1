@@ -21,40 +21,65 @@ def replace_with_blocks(text, entities):
         text = text.replace(replace_str, full_block)
     return text
 
-def analyze_entities(text_content):
-    count = []  # count variable for stats [name, address, phone no., date]
-
-    # Load the English NER model from spacy
+def find_names(text_content):
     nlp = spacy.load("en_core_web_lg")
-
-    # Process the text with the spaCy NLP pipeline
     doc = nlp(text_content)
+    return [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
 
-    # Extract named entities (addresses, dates, and phone numbers) using google natural language api
-    names = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
+def find_addresses(text_content):
     client = language_v1.LanguageServiceClient.from_service_account_json('services.json')
-
     document = language_v1.Document(content=text_content, type_=language_v1.Document.Type.PLAIN_TEXT)
     response = client.analyze_entities(document=document, encoding_type=language_v1.EncodingType.UTF8)
-
     entities = response.entities
+    return [entity.name for entity in entities if language_v1.Entity.Type(entity.type_).name == 'ADDRESS']
 
-    entity_texts = [entity.name for entity in entities if language_v1.Entity.Type(entity.type_).name in ['DATE', 'ADDRESS', 'PHONE_NUMBER']]
+def find_dates(text_content):
+    client = language_v1.LanguageServiceClient.from_service_account_json('services.json')
+    document = language_v1.Document(content=text_content, type_=language_v1.Document.Type.PLAIN_TEXT)
+    response = client.analyze_entities(document=document, encoding_type=language_v1.EncodingType.UTF8)
+    entities = response.entities
+    return [entity.name for entity in entities if language_v1.Entity.Type(entity.type_).name == 'DATE']
 
-    # Count occurrence of each entity
-    date = address = phone = 0
-    for entity in entities:
-        if language_v1.Entity.Type(entity.type_).name == 'DATE':
-            date += 1
-        elif language_v1.Entity.Type(entity.type_).name == "ADDRESS":
-            address += 1
-        elif language_v1.Entity.Type(entity.type_).name == "PHONE_NUMBER":
-            phone += 1
+def find_phone_numbers(text_content):
+    client = language_v1.LanguageServiceClient.from_service_account_json('services.json')
+    document = language_v1.Document(content=text_content, type_=language_v1.Document.Type.PLAIN_TEXT)
+    response = client.analyze_entities(document=document, encoding_type=language_v1.EncodingType.UTF8)
+    entities = response.entities
+    return [entity.name for entity in entities if language_v1.Entity.Type(entity.type_).name == 'PHONE_NUMBER']
 
-    count = [len(names), address, date, phone]
-    entity_texts += names
+def analyze_entities(text_content, censor_flags):
+    entities = []
+    count = []  # count variable for stats [name, address, phone no., date]
 
-    return entity_texts, count
+    if censor_flags["names"]:
+        names = find_names(text_content)
+        entities.extend(names)
+        count.append(len(names))
+    else:
+        count.append(0)
+
+    if censor_flags["address"]:
+        addresses = find_addresses(text_content)
+        entities.extend(addresses)
+        count.append(len(addresses))
+    else:
+        count.append(0)
+
+    if censor_flags["dates"]:
+        dates = find_dates(text_content)
+        entities.extend(dates)
+        count.append(len(dates))
+    else:
+        count.append(0)
+
+    if censor_flags["phones"]:
+        phone_numbers = find_phone_numbers(text_content)
+        entities.extend(phone_numbers)
+        count.append(len(phone_numbers))
+    else:
+        count.append(0)
+
+    return entities, count
 
 def print_stats(count, stats_file=None):
     if stats_file:
@@ -72,8 +97,8 @@ def print_stats(count, stats_file=None):
         print("Number of phone no. censored - ", count[3], file=sys.stderr if args.stats == "stderr" else sys.stdout)
 
 def detect_information(text, censor_flags):
-    # Extract entities using Google Cloud Natural Language API
-    entities, count = analyze_entities(text)
+    # Extract entities based on the specified flags
+    entities, count = analyze_entities(text, censor_flags)
 
     # Replace entities with Unicode full block characters
     text = replace_with_blocks(text, entities)
@@ -147,3 +172,4 @@ if __name__ == "__main__":
                 process_files(file_paths, args.output, censor_flags)
             else:
                 print("Please specify at least one censor flag (--names, --dates, --phones, --address).")
+
