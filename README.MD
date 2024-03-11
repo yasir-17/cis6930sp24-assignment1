@@ -15,6 +15,8 @@ For running the project use the following command
 For running the testcase use the following command
 1) pipenv run python -m pytest
 
+![](https://github.com/yasir-17/cis6930sp24-assignment1/blob/main/Recording%202024-03-10%20202646.gif)
+
 
 ## Functions
 1)  main() - This function defines the main entry point for the code. It parses command line arguments and then do the processing of files based on user-provided inputs. It ensures proper input and output handling, facilitating the overall execution of the code.
