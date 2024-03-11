@@ -1,46 +1,71 @@
 import unittest
-from unittest.mock import Mock
-from censoror import analyze_entities
+from unittest.mock import patch, MagicMock
+from google.cloud import language_v1
+from censoror import filter_out_4_digit_numbers, replace_with_blocks, find_names, find_addresses, find_dates, find_phone_numbers, analyze_entities
 
-class TestAnalyzeEntities(unittest.TestCase):
+class TestCensoringFunctions(unittest.TestCase):
 
-    def test_analyze_entities_name(self):
-        # Create a mock spaCy NLP object
-        mock_nlp = Mock()
+    def test_filter_out_4_digit_numbers(self):
+        test_strings = ['1234', 'word', '5678', 'anotherword', '9012']
+        expected_result = ['word', 'anotherword']
+        self.assertEqual(filter_out_4_digit_numbers(test_strings), expected_result)
 
-        # Create mock SpaCy entities
-        mock_ent1 = Mock(text="John Doe", label_="PERSON")
-        mock_ent2 = Mock(text="Jane Smith", label_="PERSON")
-        mock_ents = [mock_ent1, mock_ent2]
+    def test_replace_with_blocks(self):
+        text = "Hello John Doe"
+        entities = ["John", "Doe"]
+        expected_result = "Hello \u2588\u2588\u2588\u2588 \u2588\u2588\u2588"
+        self.assertEqual(replace_with_blocks(text, entities), expected_result)
 
-        # Configure the mock NLP object to return the mock entities
-        mock_nlp.return_value.ents = mock_ents
+    @patch('censoror.spacy.load')
+    def test_find_names(self, mock_spacy_load):
+        mock_nlp = mock_spacy_load.return_value
+        mock_doc = mock_nlp.return_value
+        mock_doc.ents = [MockEntity(text='John Doe', label_='PERSON')]
+        text_content = "Hello John Doe"
+        expected_result = ['John Doe']
+        self.assertEqual(find_names(text_content), expected_result)
 
-        # Test case for name entities
-        text_content = "Hello, my name is John Doe, and this is Jane Smith."
-        expected_entities = ["John Doe", "Jane Smith"]
-        
-        result, count = analyze_entities(text_content)
+    @patch('censoror.language_v1.LanguageServiceClient.from_service_account_json')
+    def test_find_addresses(self, mock_client):
+        mock_client.return_value.analyze_entities.return_value = MockResponse(entity_type='LOCATION', entity_text=['1400 Smith Street Houston, TX  77002-7311'])
+        text_content = "Send this to 1400 Smith Street Houston, TX  77002-7311"
+        expected_result = ['1400 Smith Street Houston, TX  77002-7311']
+        self.assertEqual(find_addresses(text_content), expected_result)
 
-        self.assertListEqual(result, expected_entities)
+    @patch('censoror.language_v1.LanguageServiceClient.from_service_account_json')
+    def test_find_dates(self, mock_client):
+        mock_client.return_value.analyze_entities.return_value = MockResponse(entity_type='DATE', entity_text=['January 1, 2020'])
+        text_content = "The event is on January 1, 2020"
+        expected_result = ['January 1, 2020']
+        self.assertEqual(find_dates(text_content), expected_result)
 
-    def test_empty_input(self):
-        # Test when input text is empty
-        result, count = analyze_entities("")
-        self.assertEqual(result, [])
+    @patch('censoror.language_v1.LanguageServiceClient.from_service_account_json')
+    def test_find_phone_numbers(self, mock_client):
+        mock_client.return_value.analyze_entities.return_value = MockResponse(entity_type='PHONE_NUMBER', entity_text=['555-1234-980'])
+        text_content = "Call me at 555-1234-980"
+        expected_result = ['555-1234-980']
+        self.assertEqual(find_phone_numbers(text_content), expected_result)
 
-    def test_no_entities(self):
-        # Test with input containing no relevant entities
-        text_content = "The quick brown fox jumps over the lazy dog."
-        result, count = analyze_entities(text_content)
-        self.assertEqual(result, [])
+# Helper mock class for testing spaCy entities
+class MockEntity:
+    def __init__(self, text, label_):
+        self.text = text
+        self.label_ = label_
 
-    def test_entities(self):
-        # Test with input containing a mix of relevant and irrelevant entities
-        text_content = "Meeting on 2024-03-15 at 2:30 PM. Address: 4000 SW 37th BLVD. The Phone no. for the receptionist is 352-378-4990"
-        result, count = analyze_entities(text_content)
-        expected_entities = ["352-378-4990", "2024-03-15 at 2:30 PM.", "4000 SW 37th BLVD"]
-        self.assertEqual(result, expected_entities)
+# Helper mock class for simulating Google Cloud Language API responses
+class MockResponse:
+    def __init__(self, entity_type, entity_text):
+        self.entities = [MockGoogleEntity(name=text, type_=entity_type) for text in entity_text]
+
+class MockGoogleEntity:
+    def __init__(self, name, type_):
+        self.name = name
+        self.type_ = {
+            'LOCATION': language_v1.Entity.Type.LOCATION,
+            'DATE': language_v1.Entity.Type.DATE,
+            'PHONE_NUMBER': language_v1.Entity.Type.PHONE_NUMBER,
+            # Add more types as needed
+        }.get(type_, language_v1.Entity.Type.UNKNOWN)
 
 if __name__ == '__main__':
     unittest.main()
